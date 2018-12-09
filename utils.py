@@ -14,12 +14,12 @@ FORM = 1
 LEMMA = 2
 POS_TAG = 3
 HEAD = 4
-DEPREL = 5
+DEP_REL = 5
 
 OTHER = "<other/>"
+UP = "<up/>"
+DOWN = "<down/>"
 WINDOW_SIZE = 5
-
-counter = 0
 
 
 def cosine_similarity(a, b):
@@ -60,7 +60,21 @@ def window_co_occurrence(sentence):
 
 
 def dependency_co_occurrence(sentence):
-    print("hi")
+    for word in sentence:
+        parent_id = word[HEAD]
+        if parent_id == 0:
+            continue
+        if word[POS_TAG] == 'IN':
+            raise NotImplemented
+        else:
+            parent = sentence[parent_id - 1]
+            word_count[word[LEMMA]][parent[LEMMA] + '\t' + word[DEP_REL] + '\t' + UP] += 1
+            word_count[parent[LEMMA]][word[LEMMA] + '\t' + word[DEP_REL] + '\t' + DOWN] += 1
+
+            word_count[word[LEMMA]][OTHER] += 1
+            word_count[parent[LEMMA]][OTHER] += 1
+            word_count[OTHER][word[LEMMA]] += 1
+            word_count[OTHER][parent[LEMMA]] += 1
 
 
 def read_data(co_occurrence_type):
