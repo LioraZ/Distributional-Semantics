@@ -59,8 +59,41 @@ def window_co_occurrence(sentence):
         update_word_count(word, content_words[max(0, i - 2):i + 3])
 
 
-def dependency_co_occurrence(sentence):
+def get_dependency_tree(sentence):
+    parents = defaultdict(list)
+    children = defaultdict(list)
     for word in sentence:
+        parent = word[HEAD]
+        #children[parent] += [word]
+        parents[word[ID]] += [parent]
+
+    for p_id in parents.keys():
+        parent = sentence[p_id - 1]
+        parent_change = []
+        while parent[POS_TAG] not in CONTENT_POS_TAGS and parent not in 'IN':
+            parent_change.append(parent)
+            parent = parents[parent[ID]]
+            if parent == 0:
+                break
+#        p[]
+        """for p in parent_change:
+            parents[p] = parent"""
+
+    #children = {c: p_id for p_id in parents for c in parents[p_id]}
+    for p_id in parents:
+        for c in parents[p_id]:
+            children[c] += [p_id]
+
+    return parents, children
+
+
+
+
+def dependency_co_occurrence(sentence):
+    parents, children = get_dependency_tree(sentence)
+    """for p_id in parents:
+
+   for word in sentence:
         parent_id = word[HEAD]
         if parent_id == 0:
             continue
@@ -74,7 +107,7 @@ def dependency_co_occurrence(sentence):
             word_count[word[LEMMA]][OTHER] += 1
             word_count[parent[LEMMA]][OTHER] += 1
             word_count[OTHER][word[LEMMA]] += 1
-            word_count[OTHER][parent[LEMMA]] += 1
+            word_count[OTHER][parent[LEMMA]] += 1"""
 
 
 def read_data(co_occurrence_type):
