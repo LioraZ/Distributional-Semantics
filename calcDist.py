@@ -12,7 +12,7 @@ def cosine(self, trg_word, pmi_u_att, context2word):
     dt = Counter()
 
     for trg_word1 in TARGET_WORDS:
-        trg_word = trg_word1
+        trg_word = wtoi[trg_word1]
         for context in pmi_u_att[trg_word]:
             for other_word in context2word[context]:
                 if other_word == context:
