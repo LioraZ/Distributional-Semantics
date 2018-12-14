@@ -30,7 +30,7 @@ def create_PMI_from_counts():
     counter = 0
     for word, attributes in word_count.items():
         counter += 1
-        print(str(counter) + '\t' + word)
+        print(str(counter) + '\t' + str(word))
 
         if word_count[word][OTHER] < THRESHOLD or word == OTHER:
             continue

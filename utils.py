@@ -1,11 +1,12 @@
 import numpy as np
-from collections import defaultdict
+from collections import defaultdict, Counter
 from itertools import islice
 import pickle
 import time
 import sys
+import pprint
 
-DATA_FILE = "wikipedia.sample.trees.lemmatized"
+DATA_FILE = "smaller"#"wikipedia.sample.trees.lemmatized" #"smaller"#
 CONTENT_POS_TAGS = ['JJ', 'JJR', 'JJS', 'NN', 'NNS', 'NNP', 'NNPS', 'RB', 'RBR', 'RBS', 'VB', 'VBD', 'VBG', 'VBN',
                     'VBP', 'VBZ', 'WRB']
 
@@ -21,6 +22,9 @@ UP = "<up/>"
 DOWN = "<down/>"
 WINDOW_SIZE = 5
 
+MIN_WORD_FREQUENCY = 100
+MIN_FEATURE_FREQUENCY = 20
+MIN_MUTUAL_FREQUENCY = 3
 
 def cosine_similarity(a, b):
     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
@@ -40,14 +44,15 @@ def window(seq, n=2):
 
 def update_word_count(word, content_words):
     for occ_word in content_words:
-        if word != occ_word:
+        #take only frequent words and attributes
+        if word != occ_word and lemma_count[word] >= MIN_WORD_FREQUENCY and lemma_count[occ_word] >= MIN_FEATURE_FREQUENCY:
             word_count[word][occ_word] += 1
             word_count[word][OTHER] += 1
             word_count[OTHER][occ_word] += 1
 
 
 def sentence_co_occurrence(sentence):
-    content_words = [word[LEMMA] for word in sentence if word[POS_TAG] in CONTENT_POS_TAGS]
+    content_words = [wtoi[word[LEMMA]] for word in sentence if word[POS_TAG] in CONTENT_POS_TAGS]
     for word in content_words:
         update_word_count(word, content_words)
 
@@ -87,36 +92,47 @@ def get_dependency_tree(sentence):
     return parents, children
 
 
-
-
+def get_op_direction( dir1):
+    if dir1 == 'P':
+        return 'C'
+    else:
+        return 'P'
+        
+        
 def dependency_co_occurrence(sentence):
-    parents, children = get_dependency_tree(sentence)
-    """for p_id in parents:
-
-   for word in sentence:
-        parent_id = word[HEAD]
-        if parent_id == 0:
-            continue
-        if word[POS_TAG] == 'IN':
-            raise NotImplemented
+    #content_words = [word[LEMMA] for word in sentence if word[POS_TAG] in CONTENT_POS_TAGS]
+    for a, b, word, word_tag, word_head, f in sentence: #content_words:
+        word_index = wtoi[word]
+    if lemma_count[word_index] >= MIN_WORD_FREQUENCY:
+        if sentence[int(word_head)-1][POS_TAG] == "IN": # preposition
+            attr_index_in_sen = int(sentence[int(word_head)-1][HEAD]) - 1
+            attr_index = wtoi[sentence[attr_index_in_sen][LEMMA]]
+            attr_pos = sentence[attr_index_in_sen][POS_TAG]
+            direction = 'P'
         else:
-            parent = sentence[parent_id - 1]
-            word_count[word[LEMMA]][parent[LEMMA] + '\t' + word[DEP_REL] + '\t' + UP] += 1
-            word_count[parent[LEMMA]][word[LEMMA] + '\t' + word[DEP_REL] + '\t' + DOWN] += 1
+            attr_index_in_sen = int(word_head) - 1 #sentence[int(word_head)-1]
+            attr_index = wtoi[sentence[attr_index_in_sen][LEMMA]]
+            attr_pos = sentence[attr_index_in_sen][POS_TAG]
+            direction = 'C'
+        if lemma_count[attr_index] >= MIN_FEATURE_FREQUENCY:
+            word_count[word_index][(attr_index, direction, attr_pos)] += 1
+            #attrs[(attr_index, direction, attr_pos)].add(word_index)
+        if lemma_count[attr_index] >= MIN_WORD_FREQUENCY and  lemma_count[attr_index] >= MIN_FEATURE_FREQUENCY:
+            word_count[attr_index][(word_index, get_op_direction(direction), word_tag)] += 1
+            #attrs[(word_index, get_op_direction(direction), word_tag)].add(attr_index)
 
-            word_count[word[LEMMA]][OTHER] += 1
-            word_count[parent[LEMMA]][OTHER] += 1
-            word_count[OTHER][word[LEMMA]] += 1
-            word_count[OTHER][parent[LEMMA]] += 1"""
 
 
-def read_data(co_occurrence_type):
+def read_data():
     start_time = time.time()
+    global sentences, wtoi, itow, lemma_count
+    #sentences = []
     sentence = []
     with open(DATA_FILE, encoding='utf8', mode='r') as file:
         for line in file:
             if line == '\n':
-                co_occurrence_type(sentence)
+                #co_occurrence_type(sentence)
+                sentences.append(sentence)
                 sentence = []
             else:
                 fields = line.split('\t')
@@ -124,10 +140,21 @@ def read_data(co_occurrence_type):
                 sentence.append(token)
     curr_time = time.time()
     print("Creating count dictionary took:" + str(curr_time - start_time) + '\n')
+    vocab = set([item for sublist in sentences for _, _, item, _, _, _ in sublist])
+    wtoi = {word: i for i, word in enumerate(vocab)}
+    itow = {i: word for i, word in enumerate(vocab)}
+    #target_words = ["car", "bus", "hospital", "hotel", "gun", "bomb", "horse", "fox", "table", "bowl", "guitar", "piano"]
+    lemma_count = Counter([wtoi[item] for sublist in sentences for _, _, item, _, _, _ in sublist])
 
+
+
+def get_word_count(c_occ_func, sentences):
+    for sen in sentences:
+        c_occ_func(sen)
 
 def int_default_dict():
     return defaultdict(int)
+
 
 
 def get_co_occurrence_type():
@@ -145,6 +172,17 @@ def get_co_occurrence_type():
 if __name__ == '__main__':
     c_occ_type, c_occ_func = get_co_occurrence_type()
     word_count = defaultdict(int_default_dict)
-    read_data(c_occ_func)
+    sentences = []
+    wtoi = defaultdict(int_default_dict)
+    itow = defaultdict(int_default_dict)
+    lemma_count = defaultdict(int_default_dict)
+    #read_data(c_occ_func)
+    read_data()
+    get_word_count(c_occ_func, sentences)
     pickle.dump(word_count, open("word_counts_" + c_occ_type + ".save", "wb"))
-
+    pickle.dump(wtoi,  open("word_to_index" + c_occ_type + ".save", "wb"))
+    pickle.dump(itow,  open("index_to_word" + c_occ_type + ".save", "wb"))
+    #pickle.dump(lemma_count,  open("lemma_count" + c_occ_type + ".save", "wb"))
+    #for keys,values in word_count.items():
+    #    print(itow[keys])
+    #    print(values)
