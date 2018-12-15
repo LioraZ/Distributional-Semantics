@@ -6,7 +6,7 @@ import time
 import sys
 import pprint
 
-DATA_FILE = "smaller"#"wikipedia.sample.trees.lemmatized" #"smaller"#
+DATA_FILE = "wikipedia.sample.trees.lemmatized"
 CONTENT_POS_TAGS = ['JJ', 'JJR', 'JJS', 'NN', 'NNS', 'NNP', 'NNPS', 'RB', 'RBR', 'RBS', 'VB', 'VBD', 'VBG', 'VBN',
                     'VBP', 'VBZ', 'WRB']
 
@@ -180,8 +180,8 @@ if __name__ == '__main__':
     read_data()
     get_word_count(c_occ_func, sentences)
     pickle.dump(word_count, open("word_counts_" + c_occ_type + ".save", "wb"))
-    pickle.dump(wtoi,  open("word_to_index" + c_occ_type + ".save", "wb"))
-    pickle.dump(itow,  open("index_to_word" + c_occ_type + ".save", "wb"))
+    pickle.dump(wtoi,  open("word_to_index_" + c_occ_type + ".save", "wb"))
+    pickle.dump(itow,  open("index_to_word_" + c_occ_type + ".save", "wb"))
     #pickle.dump(lemma_count,  open("lemma_count" + c_occ_type + ".save", "wb"))
     #for keys,values in word_count.items():
     #    print(itow[keys])
