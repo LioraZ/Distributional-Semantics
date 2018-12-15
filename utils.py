@@ -6,7 +6,7 @@ import time
 import sys
 import pprint
 
-DATA_FILE = "wikipedia.sample.trees.lemmatized"
+DATA_FILE = 'smaller' #"wikipedia.sample.trees.lemmatized"
 CONTENT_POS_TAGS = ['JJ', 'JJR', 'JJS', 'NN', 'NNS', 'NNP', 'NNPS', 'RB', 'RBR', 'RBS', 'VB', 'VBD', 'VBG', 'VBN',
                     'VBP', 'VBZ', 'WRB']
 
@@ -116,9 +116,13 @@ def dependency_co_occurrence(sentence):
             direction = 'C'
         if lemma_count[attr_index] >= MIN_FEATURE_FREQUENCY:
             word_count[word_index][(attr_index, direction, attr_pos)] += 1
+            word_count[word][OTHER] += 1
+            word_count[OTHER][(attr_index, direction, attr_pos)] += 1
             #attrs[(attr_index, direction, attr_pos)].add(word_index)
         if lemma_count[attr_index] >= MIN_WORD_FREQUENCY and  lemma_count[attr_index] >= MIN_FEATURE_FREQUENCY:
             word_count[attr_index][(word_index, get_op_direction(direction), word_tag)] += 1
+            word_count[attr_index][OTHER] += 1
+            word_count[OTHER][(word_index, get_op_direction(direction), word_tag)] += 1
             #attrs[(word_index, get_op_direction(direction), word_tag)].add(attr_index)
 
 
