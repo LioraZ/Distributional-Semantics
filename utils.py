@@ -1,4 +1,4 @@
-import numpy as np
+#import numpy as np
 from collections import defaultdict, Counter
 from itertools import islice
 import pickle
@@ -6,7 +6,7 @@ import time
 import sys
 import pprint
 
-DATA_FILE = 'smaller' #"wikipedia.sample.trees.lemmatized"
+DATA_FILE = "wikipedia.sample.trees.lemmatized"
 CONTENT_POS_TAGS = ['JJ', 'JJR', 'JJS', 'NN', 'NNS', 'NNP', 'NNPS', 'RB', 'RBR', 'RBS', 'VB', 'VBD', 'VBG', 'VBN',
                     'VBP', 'VBZ', 'WRB']
 
@@ -26,8 +26,8 @@ MIN_WORD_FREQUENCY = 100
 MIN_FEATURE_FREQUENCY = 20
 MIN_MUTUAL_FREQUENCY = 3
 
-def cosine_similarity(a, b):
-    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+#def cosine_similarity(a, b):
+#    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
 
 def window(seq, n=2):
@@ -103,27 +103,27 @@ def dependency_co_occurrence(sentence):
     #content_words = [word[LEMMA] for word in sentence if word[POS_TAG] in CONTENT_POS_TAGS]
     for a, b, word, word_tag, word_head, f in sentence: #content_words:
         word_index = wtoi[word]
-    if lemma_count[word_index] >= MIN_WORD_FREQUENCY:
-        if sentence[int(word_head)-1][POS_TAG] == "IN": # preposition
-            attr_index_in_sen = int(sentence[int(word_head)-1][HEAD]) - 1
-            attr_index = wtoi[sentence[attr_index_in_sen][LEMMA]]
-            attr_pos = sentence[attr_index_in_sen][POS_TAG]
-            direction = 'P'
-        else:
-            attr_index_in_sen = int(word_head) - 1 #sentence[int(word_head)-1]
-            attr_index = wtoi[sentence[attr_index_in_sen][LEMMA]]
-            attr_pos = sentence[attr_index_in_sen][POS_TAG]
-            direction = 'C'
-        if lemma_count[attr_index] >= MIN_FEATURE_FREQUENCY:
-            word_count[word_index][(attr_index, direction, attr_pos)] += 1
-            word_count[word][OTHER] += 1
-            word_count[OTHER][(attr_index, direction, attr_pos)] += 1
-            #attrs[(attr_index, direction, attr_pos)].add(word_index)
-        if lemma_count[attr_index] >= MIN_WORD_FREQUENCY and  lemma_count[attr_index] >= MIN_FEATURE_FREQUENCY:
-            word_count[attr_index][(word_index, get_op_direction(direction), word_tag)] += 1
-            word_count[attr_index][OTHER] += 1
-            word_count[OTHER][(word_index, get_op_direction(direction), word_tag)] += 1
-            #attrs[(word_index, get_op_direction(direction), word_tag)].add(attr_index)
+        if lemma_count[word_index] >= MIN_WORD_FREQUENCY:
+           if sentence[int(word_head)-1][POS_TAG] == "IN": # preposition
+               attr_index_in_sen = int(sentence[int(word_head)-1][HEAD]) - 1
+               attr_index = wtoi[sentence[attr_index_in_sen][LEMMA]]
+               attr_pos = sentence[attr_index_in_sen][POS_TAG]
+               direction = 'P'
+           else:
+               attr_index_in_sen = int(word_head) - 1 #sentence[int(word_head)-1]
+               attr_index = wtoi[sentence[attr_index_in_sen][LEMMA]]
+               attr_pos = sentence[attr_index_in_sen][POS_TAG]
+               direction = 'C'
+           if lemma_count[attr_index] >= MIN_FEATURE_FREQUENCY:
+               word_count[word_index][(attr_index, direction, attr_pos)] += 1
+               word_count[word][OTHER] += 1
+               word_count[OTHER][(attr_index, direction, attr_pos)] += 1
+               #attrs[(attr_index, direction, attr_pos)].add(word_index)
+           if lemma_count[attr_index] >= MIN_WORD_FREQUENCY and  lemma_count[attr_index] >= MIN_FEATURE_FREQUENCY:
+               word_count[attr_index][(word_index, get_op_direction(direction), word_tag)] += 1
+               word_count[attr_index][OTHER] += 1
+               word_count[OTHER][(word_index, get_op_direction(direction), word_tag)] += 1
+               #attrs[(word_index, get_op_direction(direction), word_tag)].add(attr_index)
 
 
 

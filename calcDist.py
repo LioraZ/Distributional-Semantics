@@ -31,8 +31,12 @@ def get_similar_to_target():
     #    if target in wtoi.keys():
         print ("wtoi[" + target + "] is - " + str(wtoi[target]))
         target_dict = PMI_dict[wtoi[target]]
+        print (target_dict)
         attr_dict = dict(sorted(target_dict.items(), key=operator.itemgetter(1), reverse=True)[:21])
-        top20_dict[target] = [itow[key] for key, _ in attr_dict.items() if key != OTHER]
+        if (isinstance(list(attr_dict.keys())[0], tuple)):
+            top20_dict[target] = [itow[key[0]] for key, _ in attr_dict.items() if key != OTHER]
+        else:
+            top20_dict[target] = [itow[key] for key, _ in attr_dict.items() if key != OTHER]
     return top20_dict
 
 

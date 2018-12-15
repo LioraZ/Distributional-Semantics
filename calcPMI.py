@@ -9,7 +9,7 @@ THRESHOLD = 100
 
 
 def PMI(word, attr):
-    #print ("FOR_DEBUG word_count["+ str(word) +"][OTHER] = " + str(word_count[word][OTHER]))
+    print ("FOR_DEBUG word_count["+ str(word) +"][OTHER] = " + str(word_count[word][OTHER]))
     p_word = word_count[word][OTHER] / total_counts
     p_attr = word_count[OTHER][attr] / total_counts
     p_word_and_attr = word_count[word][attr] / total_counts
@@ -28,10 +28,11 @@ def get_total_count():
 
 
 def create_PMI_from_counts():
-    counter = 0
+    #counter = 0
     #print ()
-    for word, attributes in word_count.items():
-        counter += 1
+    global word_count 
+    for word, attributes in word_count.copy().items():
+        #counter += 1
         #print(str(counter) + '\t' + str(word))
         #print(str(word_count[word][OTHER]))
         if word_count[word][OTHER] < THRESHOLD or word == OTHER:
