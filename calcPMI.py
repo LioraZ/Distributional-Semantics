@@ -9,7 +9,7 @@ THRESHOLD = 100
 
 
 def PMI(word, attr):
-    print ("FOR_DEBUG word_count["+ str(word) +"][OTHER] = " + str(word_count[word][OTHER]))
+    #print ("FOR_DEBUG word_count["+ str(word) +"][OTHER] = " + str(word_count[word][OTHER]))
     p_word = word_count[word][OTHER] / total_counts
     p_attr = word_count[OTHER][attr] / total_counts
     p_word_and_attr = word_count[word][attr] / total_counts
